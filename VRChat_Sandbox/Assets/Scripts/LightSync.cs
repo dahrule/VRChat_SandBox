@@ -7,6 +7,7 @@ using VRC.Udon.Common.Interfaces;
 
 /// <summary>
 /// Manual Syncing of group of lights state.
+/// !Set Synchronization Method to Manual in Editor.
 /// </summary>
 public class LightSync : UdonSharpBehaviour
 {
@@ -35,7 +36,7 @@ public class LightSync : UdonSharpBehaviour
         foreach (var target in targets) target.SetActive(sync_isOn);//update local variable with synced state.
     }
 
-    //Reflect state for late joiners too.
+    //Update synced variables for late joiners too.
     public override void OnDeserialization()
     {
         foreach (var target in targets) target.SetActive(sync_isOn);
