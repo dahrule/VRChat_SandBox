@@ -38,6 +38,7 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
     private int m_capacity;
     [UdonSynced] private int sync_capacity;
     private bool m_playerOwnsRole = false;
+    private bool m_portalEnabled;
     #endregion
 
     #region Built-in Methods
@@ -115,7 +116,8 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
         if (UITargets==null || UITargets.Length==0) return;
 
         string action = m_playerOwnsRole ? "Release" : "Get";
-        string message = string.Format("{0} rol: {1}.  Capacity: {2}  ", action, portalRole, m_capacity);
+        string message = m_portalEnabled ? string.Format("{0} rol: {1}.  Capacity: {2}  ", action, portalRole, m_capacity): ".…………….Out-of-use………………….";
+        
 
         foreach(var target in UITargets)
         {
@@ -133,10 +135,10 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
         if (portalGraphic == null) return;
 
         //Enable portal if capacity is not saturated or player owns role.
-        bool enabled = m_capacity > 0 || m_playerOwnsRole;
+        m_portalEnabled = m_capacity > 0 || m_playerOwnsRole;
 
-        portalGraphic.SetActive(enabled); //hide/show graphic
-        this.GetComponent<Collider>().enabled=enabled; //enable/disable interactions with portal
+        portalGraphic.SetActive(m_portalEnabled); //hide/show graphic
+        this.GetComponent<Collider>().enabled=m_portalEnabled; //enable/disable interactions with portal
     }
     #endregion
 }

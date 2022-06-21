@@ -7,10 +7,10 @@ using System.Collections;
 using UnityEngine.UI;
 
 /// <summary>
-/// Creates the effect of horizontally moving text on the screen.
+/// Creates the effect of horizontally scrolling text on the screen by continuously creating a new version of the text message and displaying only part of it.
 /// !Set Synchronization Method to Manual in Editor.
 /// </summary>
-public class TextDisplayScreen : UdonSharpBehaviour
+public class OnScreenScrollingText : UdonSharpBehaviour
 {
     [SerializeField] Text messageToDisplay;
 
@@ -25,6 +25,12 @@ public class TextDisplayScreen : UdonSharpBehaviour
 
     private float lastTimestamp;
 
+    private void Start()
+    {
+        //Avoid errors with an empty message or shorter than the screensize.
+        if (originalMessage.Length==0) originalMessage = " ";
+        screenSize = Mathf.Clamp(screenSize,0, originalMessage.Length);
+    }
     private void Update()
     {
         //Repeat the body of the function each timerSpeed seconds to animate the sliding text.
