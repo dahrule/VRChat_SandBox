@@ -4,19 +4,26 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 using VRC.Udon.Common.Interfaces;
+using UnityEngine.UI;
 
 /// <summary>
-/// Manual Syncing of group of lights state.
+/// Manual Syncing of a group of lights.
 /// !Set Synchronization Method to Manual in Editor.
 /// </summary>
-public class LightSync : UdonSharpBehaviour
+public class LightSyncController : UdonSharpBehaviour
 {
+    [SerializeField] string descriptor;
+    [SerializeField] Text descriptionLabel;
     [SerializeField] GameObject[] targets;
     [UdonSynced] bool sync_isOn = false;
 
     void Start()
     {
-        foreach (var target in targets) target.SetActive(false); 
+        if (targets.Length == 0) return;
+        foreach (var target in targets) target.SetActive(false);
+
+        if (descriptionLabel == null) return;
+        descriptionLabel.text = descriptor;
     }
 
     public override void Interact()
@@ -31,7 +38,7 @@ public class LightSync : UdonSharpBehaviour
 
     private void Toggle()
     {
-
+        if (targets.Length == 0) return;
         sync_isOn = !targets[0].activeSelf; //set sync variable to the new  local state.
         foreach (var target in targets) target.SetActive(sync_isOn);//update local variable with synced state.
     }
@@ -39,6 +46,7 @@ public class LightSync : UdonSharpBehaviour
     //Update synced variables for late joiners too.
     public override void OnDeserialization()
     {
+        if (targets.Length == 0) return;
         foreach (var target in targets) target.SetActive(sync_isOn);
     }
 }

@@ -49,6 +49,8 @@ public class FxControllerRoleExecutor : UdonSharpBehaviour
 
     private void SetTargetState(GameObject target, bool state)
     {
+        if (target==null) return;
+
         //Disable interaction
         target.GetComponent<Collider>().enabled = state;
 

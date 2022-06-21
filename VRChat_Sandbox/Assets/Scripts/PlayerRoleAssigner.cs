@@ -13,16 +13,17 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
 {
     #region Variables
     [Header("Properties")]
-    [Tooltip("Role that the portal provides.")]
+    [Tooltip("Role that the portal assigns.")]
     [SerializeField] string portalRole;
 
     [Tooltip("Maximum number of users that can own this role.")]
     [SerializeField] int MaxCapacity = 0;
 
-    [Header("UI")]
+    //TODELETE 
+    /*[Header("UI")] 
     [SerializeField] Text capacityLabel;
     [SerializeField] Text roleLabel;
-
+    */
     [Header("Graphics")]
     [SerializeField] GameObject portalGraphic;
     [SerializeField] Material getRoleMat;
@@ -30,6 +31,9 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
 
     [Header("ActionsTriggered by this role")]
     [SerializeField] UdonSharpBehaviour ActionTarget;
+
+    [Header("UI")]
+    [SerializeField] UdonSharpBehaviour[] UITargets;
 
     private int m_capacity;
     [UdonSynced] private int sync_capacity;
@@ -42,11 +46,11 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
         m_capacity = MaxCapacity;
         sync_capacity = m_capacity;
 
-        UpdateUI();
-
         SetPortalMaterial();
 
         SetPortalAvailability();
+
+        UpdateUI();
     }
     public override void OnPlayerTriggerEnter(VRCPlayerApi player)
     {
@@ -57,16 +61,13 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
         //Assign player role otherwise.
         else m_playerOwnsRole = true;
 
-        //Update portal's capacity
-        m_capacity = m_playerOwnsRole ? m_capacity-- : m_capacity++;
-        //Update synced variables
-        if (!Networking.IsOwner(this.gameObject)) Networking.SetOwner(Networking.LocalPlayer, this.gameObject); //set script's ownership to local player
-        sync_capacity = Mathf.Clamp(m_capacity, 0, MaxCapacity);
-        //Synced local variables
-        m_capacity = sync_capacity;
-
         //Set player role tag
         player.SetPlayerTag("role", m_playerOwnsRole ? portalRole : null);
+
+        //Update portal's capacity
+        m_capacity = m_playerOwnsRole ? m_capacity-- : m_capacity++;
+        
+        SyncVariables();
 
         SetPortalMaterial();
 
@@ -74,11 +75,20 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
 
         UpdateUI();
 
-        //Send message to reflect role consequences.
+        //Send message to reflect role consequences. The Do/UndoAction methods must be public members of the ActionTarget script reference.
         string message = m_playerOwnsRole ? "DoAction" : "UndoAction";
         if (ActionTarget) ActionTarget.SendCustomEvent(message);
 
         RequestSerialization();
+    }
+
+    private void SyncVariables()
+    {
+        //Update synced variables
+        if (!Networking.IsOwner(this.gameObject)) Networking.SetOwner(Networking.LocalPlayer, this.gameObject); //set script's ownership to local player
+        sync_capacity = Mathf.Clamp(m_capacity, 0, MaxCapacity);
+        //Sync local variables
+        m_capacity = sync_capacity;
     }
 
     //Update synced variables for late joiners too.
@@ -102,14 +112,26 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
     }
     private void UpdateUI()
     {
-        string action = m_playerOwnsRole ? "Release" : "Get";
-        string role= portalRole;
+        if (UITargets==null || UITargets.Length==0) return;
 
-        roleLabel.text = string.Format("{0} Rol: {1}", action, role);
-        capacityLabel.text = "Portal capacity: " + m_capacity.ToString();
+        string action = m_playerOwnsRole ? "Release" : "Get";
+        string message = string.Format("{0} rol: {1}.  Capacity: {2}  ", action, portalRole, m_capacity);
+
+        foreach(var target in UITargets)
+        {
+            target.SetProgramVariable("originalMessage", message);
+        }
+        
+
+        //if (roleLabel == null || capacityLabel == null) return; //TODELETE 
+
+        //roleLabel.text = string.Format("{0} Rol: {1}", action, portalRole); //TODELETE
+        //capacityLabel.text = "Portal capacity: " + m_capacity.ToString(); //TODELETE
     }
     private void SetPortalAvailability()
     {
+        if (portalGraphic == null) return;
+
         //Enable portal if capacity is not saturated or player owns role.
         bool enabled = m_capacity > 0 || m_playerOwnsRole;
 
