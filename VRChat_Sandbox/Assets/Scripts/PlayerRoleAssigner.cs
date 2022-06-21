@@ -30,10 +30,13 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
     [SerializeField] Material releaseRoleMat;
 
     [Header("ActionsTriggered by this role")]
-    [SerializeField] UdonSharpBehaviour ActionTarget;
+    [SerializeField] UdonSharpBehaviour ExecutorTarget;
 
     [Header("UI")]
     [SerializeField] UdonSharpBehaviour[] UITargets;
+
+    [Header("SFX")]
+    [SerializeField] AudioClip PortalEnterSFX;
 
     private int m_capacity;
     [UdonSynced] private int sync_capacity;
@@ -74,11 +77,13 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
 
         SetPortalAvailability();
 
+        PlaySoundSFX();
+
         UpdateUI();
 
         //Send message to reflect role consequences. The Do/UndoAction methods must be public members of the ActionTarget script reference.
         string message = m_playerOwnsRole ? "DoAction" : "UndoAction";
-        if (ActionTarget) ActionTarget.SendCustomEvent(message);
+        if (ExecutorTarget) ExecutorTarget.SendCustomEvent(message);
 
         RequestSerialization();
     }
@@ -139,6 +144,14 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
 
         portalGraphic.SetActive(m_portalEnabled); //hide/show graphic
         this.GetComponent<Collider>().enabled=m_portalEnabled; //enable/disable interactions with portal
+    }
+
+    private void PlaySoundSFX()
+    {
+        if (!PortalEnterSFX) return;
+
+        Vector3 position = this.gameObject.transform.position;
+        AudioSource.PlayClipAtPoint(PortalEnterSFX,position);
     }
     #endregion
 }
