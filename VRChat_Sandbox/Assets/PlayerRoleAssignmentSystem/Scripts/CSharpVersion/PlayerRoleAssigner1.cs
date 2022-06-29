@@ -60,12 +60,10 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
     {
         if (!(player.IsValid() && player.isLocal)) return;
 
-        //Release player role if owned.
-        if (player.GetPlayerTag("role") == portalRole) m_playerOwnsRole = false;
-        //Assign player role otherwise.
-        else m_playerOwnsRole = true;
+        //Assign player role when entering portal. Otherwise release player role if owned.
+        m_playerOwnsRole = player.GetPlayerTag("role") == portalRole ? false : true;
 
-        //Set player role tag
+        //Set player role tag. This is what identifies the player as owner of a role.
         player.SetPlayerTag("role", m_playerOwnsRole ? portalRole : null);
 
         //Update portal's capacity
@@ -81,7 +79,7 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
 
         UpdateUI();
 
-        //Send message to reflect role consequences. The Do/UndoAction methods must be public members of the ActionTarget script reference.
+        //Send message to reflect role consequences. The DoAction/UndoAction methods must be public members of the ExecutorTarget script reference.
         string message = m_playerOwnsRole ? "DoAction" : "UndoAction";
         if (ExecutorTarget) ExecutorTarget.SendCustomEvent(message);
 
@@ -139,7 +137,7 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
     {
         if (portalGraphic == null) return;
 
-        //Enable portal if capacity is not saturated or player owns role.
+        //Enable portal if capacity is not full or player owns role.
         m_portalEnabled = m_capacity > 0 || m_playerOwnsRole;
 
         portalGraphic.SetActive(m_portalEnabled); //hide/show graphic

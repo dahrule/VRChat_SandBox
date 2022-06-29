@@ -166,7 +166,7 @@ MonoBehaviour:
       Data: 11|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
-      Data: If a portal is using the screen, the variable will be set by the portal
+      Data: If a portal is using the screen, the string will be set by the portal.
     - Name: 
       Entry: 8
       Data: 
@@ -238,8 +238,8 @@ MonoBehaviour:
       Data: 16|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
-      Data: Time in seconds the screen takes to refresh, creating the text moving
-        effect
+      Data: Time in seconds the screen takes to refresh; creates the text moving
+        effect.
     - Name: 
       Entry: 8
       Data: 
@@ -317,8 +317,8 @@ MonoBehaviour:
       Data: 22|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
-      Data: Characters of the original message that the screen displays each refresh
-        time.
+      Data: Num. of characters from the original message (starting the count from
+        1st character) that the screen displays at each refresh time.
     - Name: 
       Entry: 8
       Data: 

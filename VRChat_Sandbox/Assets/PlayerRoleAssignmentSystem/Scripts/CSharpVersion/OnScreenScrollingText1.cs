@@ -3,7 +3,6 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
-using System.Collections;
 using UnityEngine.UI;
 
 /// <summary>
@@ -14,26 +13,29 @@ public class OnScreenScrollingText : UdonSharpBehaviour
 {
     [SerializeField] Text messageToDisplay;
 
-    [Tooltip("If a portal is using the screen, the variable will be set by the portal")]
-    public string originalMessage;
+    [Tooltip("If a portal is using the screen, the string will be set by the portal.")]
+    public string originalMessage="....Out-of-use....";
 
-    [Tooltip("Time in seconds the screen takes to refresh, creating the text moving effect")]
+    [Tooltip("Time in seconds the screen takes to refresh; creates the text moving effect.")]
     [SerializeField] float refreshTime = 0.2f;
 
-    [Tooltip("Characters of the original message that the screen displays each refresh time.")]
+    [Tooltip("Num. of characters from the original message (starting the count from 1st character) that the screen displays at each refresh time.")]
     [SerializeField] int screenSize=25;
 
     private float lastTimestamp;
 
     private void Start()
     {
-        //Avoid errors with an empty message or shorter than the screensize.
+        //Avoid errors with a message shorter than the screensize.
         if (originalMessage.Length==0) originalMessage = " ";
-        screenSize = Mathf.Clamp(screenSize,0, originalMessage.Length);
+        screenSize = Mathf.Clamp(screenSize,1, originalMessage.Length);
     }
     private void Update()
     {
-        //Repeat the body of the function each timerSpeed seconds to animate the sliding text.
+        /// <summary>
+        /// Animation hapens here. 
+        /// Create a new message from original and fit the result to the screen size every refresh time of the screen.
+        /// </summary>
         if (Time.time - lastTimestamp >= refreshTime)
         {
             lastTimestamp = Time.time;

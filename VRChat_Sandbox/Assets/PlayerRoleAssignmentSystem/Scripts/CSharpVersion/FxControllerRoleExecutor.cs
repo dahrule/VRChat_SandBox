@@ -6,9 +6,10 @@ using VRC.Udon;
 
 /// <summary>
 /// Defines the consequences of owning the role: FXController
-/// Consequences: Turns light & sound controllers available for local players owning the role.
+/// Consequences: Sets light & sound controllers available for local players owning the role.
 ///!Set Synchronization Method to Manual in Editor.
 /// </summary>
+/// 
 public class FxControllerRoleExecutor : UdonSharpBehaviour
 {
     [SerializeField] GameObject[] targets;
@@ -25,7 +26,7 @@ public class FxControllerRoleExecutor : UdonSharpBehaviour
         }
     }
 
-    //Response to event sent by PlayerRoleAssigenr class.
+    //Response to event sent by PlayerRoleAssigner class.
     public void DoAction()
     {
        if (targets.Length == 0) return;
@@ -36,7 +37,7 @@ public class FxControllerRoleExecutor : UdonSharpBehaviour
         }
     }
 
-    //Response to event sent by PlayerRoleAssigenr class.
+    //Response to event sent by PlayerRoleAssigner class.
     public void UndoAction()
     {
         if (targets.Length == 0) return;
