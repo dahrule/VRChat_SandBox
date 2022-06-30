@@ -7,9 +7,8 @@ using UnityEngine.UI;
 
 /// <summary>
 /// Assigns or removes a role from local player when entering the portal.
-/// !Set Synchronization Method to Manual in Editor.
 /// </summary>
-public class PlayerRoleAssigner : UdonSharpBehaviour
+public class PlayerRoleAssigner : MonoBehaviour
 {
     #region Variables
     [Header("Properties")]
@@ -29,17 +28,12 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
     [SerializeField] Material getRoleMat;
     [SerializeField] Material releaseRoleMat;
 
-    [Header("ActionsTriggered by this role")]
-    [SerializeField] UdonSharpBehaviour ExecutorTarget;
-
-    [Header("UI")]
-    [SerializeField] UdonSharpBehaviour[] UITargets;
-
     [Header("SFX")]
     [SerializeField] AudioClip PortalEnterSFX;
 
+    private string m_activatorTag = "Player";
     private int m_capacity;
-    [UdonSynced] private int sync_capacity;
+    //[UdonSynced] private int sync_capacity;
     private bool m_playerOwnsRole = false;
     private bool m_portalEnabled;
     #endregion
@@ -48,7 +42,7 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
     void Start()
     {
         m_capacity = MaxCapacity;
-        sync_capacity = m_capacity;
+        //sync_capacity = m_capacity;
 
         SetPortalMaterial();
 
@@ -56,9 +50,10 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
 
         UpdateUI();
     }
-    public override void OnPlayerTriggerEnter(VRCPlayerApi player)
+    private void OnTriggerEnter(Collider other)
     {
-        if (!(player.IsValid() && player.isLocal)) return;
+        //Check if what enters the trigger is a player
+        if (!(other.gameObject.CompareTag(m_activatorTag))) return;
 
         //Assign player role when entering portal. Otherwise release player role if owned.
         m_playerOwnsRole = player.GetPlayerTag("role") == portalRole ? false : true;
@@ -68,8 +63,9 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
 
         //Update portal's capacity
         m_capacity = m_playerOwnsRole ? m_capacity-- : m_capacity++;
-        
-        SyncVariables();
+
+
+        // SyncVariables();
 
         SetPortalMaterial();
 
@@ -83,19 +79,19 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
         string message = m_playerOwnsRole ? "DoAction" : "UndoAction";
         if (ExecutorTarget) ExecutorTarget.SendCustomEvent(message);
 
-        RequestSerialization();
+        //RequestSerialization();
     }
-
-    private void SyncVariables()
+ 
+    /*private void SyncVariables()
     {
         //Update synced variables
         if (!Networking.IsOwner(this.gameObject)) Networking.SetOwner(Networking.LocalPlayer, this.gameObject); //set script's ownership to local player
         sync_capacity = Mathf.Clamp(m_capacity, 0, MaxCapacity);
         //Sync local variables
         m_capacity = sync_capacity;
-    }
+    }*/
 
-    //Update synced variables for late joiners too.
+    /*//Update synced variables for late joiners too.
     public override void OnDeserialization()
     {
         //Update local variable with synced values.
@@ -104,7 +100,7 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
         SetPortalAvailability();
 
         UpdateUI();
-    }
+    }*/
     #endregion
 
     #region Custom Methods
@@ -116,22 +112,11 @@ public class PlayerRoleAssigner : UdonSharpBehaviour
     }
     private void UpdateUI()
     {
-        if (UITargets==null || UITargets.Length==0) return;
 
         string action = m_playerOwnsRole ? "Release" : "Get";
         string message = m_portalEnabled ? string.Format("{0} rol: {1}.  Capacity: {2}  ", action, portalRole, m_capacity): ".…………….Out-of-use………………….";
-        
+         //iNVOKE EVENT
 
-        foreach(var target in UITargets)
-        {
-            target.SetProgramVariable("originalMessage", message);
-        }
-        
-
-        //if (roleLabel == null || capacityLabel == null) return; //TODELETE 
-
-        //roleLabel.text = string.Format("{0} Rol: {1}", action, portalRole); //TODELETE
-        //capacityLabel.text = "Portal capacity: " + m_capacity.ToString(); //TODELETE
     }
     private void SetPortalAvailability()
     {
